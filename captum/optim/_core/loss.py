@@ -78,8 +78,23 @@ class Loss(ABC):
                 "Can only divide by int or float. Received type " + str(type(other))
             )
 
+    def __pow__(self, other):
+        if isinstance(other, (int, float)):
+
+            def loss_fn(module):
+                return self(module) ** other
+
+            return CompositeLoss(loss_fn, name=self.__name__, target=self.target)
+        else:
+            raise TypeError(
+                "Can only use int or float powers. Received type " + str(type(other))
+            )
+
     def __rmul__(self, other):
         return self.__mul__(other)
+
+    def __rpow__(self, other):
+        return self.__pow__(other)
 
     def __radd__(self, other):
         return self.__add__(other)
