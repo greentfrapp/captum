@@ -174,6 +174,7 @@ class ChannelActivation(Loss):
         self.target = target
         self.channel_index = channel_index
 
+    @batch_target_wrapper
     def __call__(self, targets_to_values: ModuleOutputMapping) -> torch.Tensor:
         activations = targets_to_values[self.target]
         assert activations is not None
