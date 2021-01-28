@@ -116,9 +116,37 @@ def loss_wrapper(cls):
 
     @functools.wraps(cls)
     def wrapper(*args, **kwargs):
+        if "target_batch" not in kwargs:
+            t_batch = None
+        else:
+            t_batch = kwargs["target_batch"]
+            del kwargs["target_batch"]
         obj = cls(*args, **kwargs)
+        obj._target_batch = t_batch
         args_str = " [" + ", ".join([_make_arg_str(arg) for arg in args]) + "]"
         obj.__name__ = cls.__name__ + args_str
+        return obj
+
+    return wrapper
+
+
+def batch_target_wrapper(cls):
+    """
+    Extract target batch if needed.
+    Used on loss class __call__ functions.
+    """ 
+
+    @functools.wraps(cls)
+    def wrapper(*args, **kwargs):
+        new_args = []
+        for i, activ in enumerate(args):
+            if isinstance(activ, dict):
+                 if args[i-1]._target_batch is not None:
+                     for key in activ.keys():
+                         t_batch = args[i-1]._target_batch
+                         activ[key] = activ[key][t_batch : t_batch + 1]
+            new_args.append(activ)
+        obj = cls(*new_args, **kwargs)
         return obj
 
     return wrapper
