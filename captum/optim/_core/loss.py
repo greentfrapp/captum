@@ -158,6 +158,7 @@ class LayerActivation(Loss):
     Maximize activations at the target layer.
     """
 
+    @batch_target_wrapper
     def __call__(self, targets_to_values: ModuleOutputMapping) -> torch.Tensor:
         return targets_to_values[self.target]
 
